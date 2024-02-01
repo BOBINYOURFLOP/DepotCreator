@@ -1,0 +1,11 @@
+cloudscraper
+numpy
+datetime
+yfinance
+tabulate
+matplotlib
+pandas
+traceback
+threading
+flask
+Pillow

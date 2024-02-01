@@ -144,8 +144,4 @@ def GetStockChart():
     return send_file(img_buffer, mimetype='image/png')
 if __name__ == '__main__':
     app.run(host='0.0.0.0')
-General.Main()
-def get_stock_data(symbol, start_date, end_date):
-    # Download historical data as a Pandas DataFrame
-    stock_data = yf.download(symbol, start=start_date, end=end_date)
-    return stock_data
+

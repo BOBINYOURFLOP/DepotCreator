@@ -5,7 +5,6 @@ yfinance
 tabulate
 matplotlib
 pandas
-traceback
 threading
 flask
 Pillow

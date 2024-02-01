@@ -1,5 +1,3 @@
-from flask import Flask, render_template, request, send_file
-app = Flask(__name__)
 import cloudscraper
 import numpy
 import datetime
@@ -11,6 +9,7 @@ import pandas as pd
 import yfinance as yf
 from datetime import datetime, timedelta
 import traceback,threading
+from flask import Flask, render_template, request, send_file
 import matplotlib.pyplot as plt
 import io
 import base64
@@ -98,6 +97,7 @@ class ProcessData():
                     and Data[Names][0] > MinimumPrice
                 ):
                     NameData.append(Names)
+        Data = None
         stock_data = yf.download(
                             NameData,
                             start=some_years_ago,
@@ -114,7 +114,9 @@ class ProcessData():
                         FinalStocks["Stock"].append(StockData)
             except:
                 pass
+        stock_data = None
         return FinalStocks["Stock"]
+app = Flask(__name__)
 
 @app.route('/')
 def index():
@@ -144,4 +146,3 @@ def GetStockChart():
     return send_file(img_buffer, mimetype='image/png')
 if __name__ == '__main__':
     app.run(host='0.0.0.0')
-

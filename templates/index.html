@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DepotCreationTool</title>
+    <style>
+        body {
+            background-color: #262625;
+            color: #ffffff;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+        }
+
+        #main-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            min-height: calc(100vh - 20vh);
+            margin-bottom: 20vh;
+        }
+
+        #websiteTitle {
+            font-size: 30px;
+            margin-bottom: 20px;
+            color: #00cc00;
+        }
+
+        #getStocksButton {
+            background-color: #00cc00;
+            transition: background-color 0.3s ease;
+            padding: 20px 40px;
+            font-size: 24px;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            border-radius: 30px;
+            margin-bottom: 20px;
+        }
+
+        #getStocksButton:disabled {
+            cursor: not-allowed;
+        }
+
+        #getStocksButton.loading {
+            background-color: red;
+        }
+
+        .slider-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 80%;
+            margin-bottom: 20px;
+        }
+
+        .slider-label {
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        .slider {
+            width: 100%;
+            margin-bottom: 20px;
+            -webkit-appearance: none;
+            appearance: none;
+            height: 15px;
+            border-radius: 10px;
+            background: #555;
+            outline: none;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            background: #00cc00;
+            cursor: pointer;
+        }
+
+        .slider::-moz-range-thumb {
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            background: #00cc00;
+            cursor: pointer;
+        }
+
+        .slider-value {
+            font-size: 16px;
+            color: #00cc00;
+        }
+
+        #stockListContainer {
+            margin-top: 20px;
+            text-align: left;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th, td {
+            border: 1px solid #555;
+            padding: 12px; /* Adjusted padding for increased spacing */
+            text-align: left;
+            font-size: 14px;
+        }
+
+        th {
+            background-color: #333;
+            color: #fff;
+        }
+
+        .stock-list-item {
+            font-size: 14px;
+            margin-bottom: 15px; /* Adjusted margin for increased spacing */
+        }
+        #selectStockChartTitle {
+            font-size: 24px;
+            margin-bottom: 10px;
+            color: #fff;
+        }
+
+        #dropdownContainer {
+            width: 100%;
+            max-width: 300px;
+            overflow: hidden;
+            border-radius: 15px;
+        }
+
+        #stockDropdown {
+            width: calc(100% + 2px); /* Adjust for the border */
+            box-sizing: border-box;
+            padding: 10px;
+            font-size: 18px;
+            border: 2px solid #00cc00;
+            border-radius: 15px;
+            margin-bottom: 15px;
+            cursor: not-allowed;
+        }
+
+        #stockDropdown:enabled {
+            cursor: pointer;
+        }
+
+        #stockDropdown:hover {
+            background-color: #333;
+            color: #fff;
+        }
+
+        #getStockChartButton {
+            background-color: #00cc00;
+            transition: background-color 0.3s ease;
+            padding: 20px 40px;
+            font-size: 24px;
+            text-decoration: none;
+            border: none;
+            cursor: not-allowed;
+            border-radius: 30px;
+            margin-bottom: 20px;
+            color: #fff;
+        }
+
+        #getStockChartButton:disabled {
+            background-color: red;
+        }
+
+        #getStockChartButton:enabled {
+            cursor: pointer;
+            background-color: #00cc00;
+        }
+
+        #chartContainer {
+            margin-top: 20px;
+        }
+
+        #stockChart {
+            width: 100%;
+            max-width: 800px; /* Adjust the maximum width as needed */
+            height: auto;
+            display: none;
+        }
+
+
+        @media screen and (min-width: 768px) {
+            /* Apply styles for larger screens (PC) */
+            th, td {
+                font-size: 18px;
+            }
+
+            #getStocksButton {
+                font-size: 28px;
+            }
+
+            .stock-list-item {
+                font-size: 18px;
+                margin-bottom: 20px; /* Adjusted margin for increased spacing */
+            }
+
+            /* Hide the additional content for scrolling on PC screens */
+            #additionalContent {
+                height: 20vh;
+                flex-shrink: 0; /* Prevent the additionalContent div from shrinking */
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="main-container">
+        <div id="websiteTitle">Best Stock Scraper</div>
+        <button id="getStocksButton" onclick="sendRequest()">Get The Best Stocks</button>
+
+        <div class="slider-container">
+            <div class="slider-label">Years to Check (1 to 10)</div>
+            <input type="range" min="1" max="10" value="5" class="slider" id="yearsSlider">
+            <div class="slider-value" id="yearsValue">Value: 5</div>
+
+            <div class="slider-label">Max DrawDown (1 to 100)</div>
+            <input type="range" min="1" max="100" value="50" class="slider" id="drawdownSlider">
+            <div class="slider-value" id="drawdownValue">Value: 50</div>
+
+            <div class="slider-label">5 Years Profit (1 to 300)</div>
+            <input type="range" min="1" max="300" value="150" class="slider" id="profit5YearsSlider">
+            <div class="slider-value" id="profit5YearsValue">Value: 250</div>
+
+            <div class="slider-label">1 Year Profit (1 to 200)</div>
+            <input type="range" min="1" max="200" value="100" class="slider" id="profit1YearSlider">
+            <div class="slider-value" id="profit1YearValue">Value: 250</div>
+
+            <div class="slider-label">Minimum Price (0.1 to 100)</div>
+            <input type="range" min="0.1" max="100" value="50" step="0.1" class="slider" id="minPriceSlider">
+            <div class="slider-value" id="minPriceValue">Value: 50</div>
+        </div>
+        <div id="stockListContainer">
+            <h2>Recommended Stocks:</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th colspan="5">Stocklist</th>
+                    </tr>
+                </thead>
+                <tbody id="stockList"></tbody>
+            </table>
+        </div>
+        <div>
+            <h2 id="selectStockChartTitle">Select Stock Chart:</h2>
+            <select id="stockDropdown" disabled></select>
+            <button id="getStockChartButton" onclick="getStockChart()" disabled>Get Stock Chart</button>
+        </div>
+    
+        <div id="chartContainer">
+            <!-- No default "no image" image here -->
+            <img id="stockChart" alt="Stock Chart">
+        </div>
+    </div>
+
+    <div id="additionalContent" style="height: 20vh;"></div>
+    
+    <script>
+        function updateSliderValue(sliderId, valueId) {
+            const slider = document.getElementById(sliderId);
+            const value = document.getElementById(valueId);
+            value.innerHTML = `Value: ${slider.value}`;
+        }
+    
+        document.getElementById('yearsSlider').addEventListener('input', () => {
+            updateSliderValue('yearsSlider', 'yearsValue');
+        });
+    
+        document.getElementById('drawdownSlider').addEventListener('input', () => {
+            updateSliderValue('drawdownSlider', 'drawdownValue');
+        });
+    
+        document.getElementById('profit5YearsSlider').addEventListener('input', () => {
+            updateSliderValue('profit5YearsSlider', 'profit5YearsValue');
+        });
+    
+        document.getElementById('profit1YearSlider').addEventListener('input', () => {
+            updateSliderValue('profit1YearSlider', 'profit1YearValue');
+        });
+    
+        document.getElementById('minPriceSlider').addEventListener('input', () => {
+            updateSliderValue('minPriceSlider', 'minPriceValue');
+        });
+    
+        function sendRequest() {
+            const button = document.getElementById('getStocksButton');
+            button.classList.add('loading');
+            button.disabled = true;
+    
+            const yearsValue = document.getElementById('yearsSlider').value;
+            const drawdownValue = document.getElementById('drawdownSlider').value;
+            const profit5YearsValue = document.getElementById('profit5YearsSlider').value;
+            const profit1YearValue = document.getElementById('profit1YearSlider').value;
+            const minPriceValue = document.getElementById('minPriceSlider').value;
+    
+            const data = {
+                YearsToCheck: yearsValue,
+                MaxDrawDown: drawdownValue,
+                FiveYearsProfit: profit5YearsValue,
+                OneYearProfit: profit1YearValue,
+                MinimumPrice: minPriceValue
+            };
+    
+            fetch('/Stocks', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+            })
+            .then(response => response.json())
+            .then(stockList => {
+                displayStockList(stockList);
+                button.classList.remove('loading');
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            })
+            .finally(() => {
+                button.disabled = false;
+            });
+        }
+
+        function displayStockList(stockList) {
+            // Update the stock dropdown menu
+            const stockDropdown = document.getElementById('stockDropdown');
+            stockDropdown.innerHTML = ''; // Clear previous options
+
+            stockList.forEach(stock => {
+                const option = document.createElement('option');
+                option.value = stock;
+                option.textContent = stock;
+                stockDropdown.appendChild(option);
+            });
+
+            // Display the stock list in the table
+            const stockListContainer = document.getElementById('stockList');
+            stockListContainer.innerHTML = '';
+
+            for (let i = 0; i < stockList.length; i += 3) {
+                const stockRow = document.createElement('tr');
+
+                for (let j = i; j < i + 3 && j < stockList.length; j++) {
+                    const stockData = document.createElement('td');
+                    stockData.className = 'stock-list-item';
+                    stockData.textContent = stockList[j];
+                    stockRow.appendChild(stockData);
+
+                    if (j < i + 2) {
+                        const line = document.createElement('td');
+                        line.style.borderRight = '1px solid #555';
+                        stockRow.appendChild(line);
+                    }
+                }
+
+                stockListContainer.appendChild(stockRow);
+            }
+            updateDropdownAndButtonState()
+        }
+
+        function getStockChart() {
+            const selectedStock = document.getElementById('stockDropdown').value;
+
+            fetch('/GetStockChart', {
+                method: 'POST',
+                body: JSON.stringify({ Symbol: selectedStock }),
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                return response.arrayBuffer();
+            })
+            .then(imageBuffer => {
+                const chartImage = document.getElementById('stockChart');
+                const imageUrl = URL.createObjectURL(new Blob([imageBuffer], { type: 'image/png' }));
+                
+                // Make sure to show the image container before setting the source
+                document.getElementById('chartContainer').style.display = 'block';
+                
+                chartImage.src = imageUrl;
+                chartImage.alt = `Stock Chart for ${selectedStock}`;
+                chartImage.style.display = 'block'; // Ensure the image is set to display
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+        function updateDropdownAndButtonState() {
+            const dropdown = document.getElementById('stockDropdown');
+            const button = document.getElementById('getStockChartButton');
+            
+            if (dropdown.options.length === 0) {
+                dropdown.disabled = true;
+                button.disabled = true;
+            } else {
+                dropdown.disabled = false;
+                button.disabled = dropdown.value === '';
+            }
+        }
+
+        document.getElementById('stockDropdown').addEventListener('change', () => {
+            const button = document.getElementById('getStockChartButton');
+            button.disabled = document.getElementById('stockDropdown').value === '';
+        });
+
+        updateDropdownAndButtonState();
+        
+    </script>
+</body>
+</html>
